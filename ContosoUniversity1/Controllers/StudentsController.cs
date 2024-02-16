@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity1.Data;
 using ContosoUniversity1.Models;
-using ContosoUniversity1;
 
 namespace ContosoUniversity1.Controllers
 {
@@ -23,10 +22,9 @@ namespace ContosoUniversity1.Controllers
         // GET: Students
         public async Task<IActionResult> Index(
             string sortOrder,
-            string searchString,
             string currentFilter,
-            int? pageNumber
-            )
+            string searchString,
+            int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
@@ -42,12 +40,13 @@ namespace ContosoUniversity1.Controllers
             }
 
             ViewData["CurrentFilter"] = searchString;
+
             var students = from s in _context.Students
                            select s;
             if (!String.IsNullOrEmpty(searchString))
             {
                 students = students.Where(s => s.LastName!.Contains(searchString)
-                  || s.FirstMidName!.Contains(searchString));
+                                       || s.FirstMidName!.Contains(searchString));
             }
             switch (sortOrder)
             {
@@ -64,9 +63,11 @@ namespace ContosoUniversity1.Controllers
                     students = students.OrderBy(s => s.LastName);
                     break;
             }
+
             int pageSize = 3;
             return View(await PaginatedList<Student>.CreateAsync(students.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
+
         // GET: Students/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -76,10 +77,11 @@ namespace ContosoUniversity1.Controllers
             }
 
             var student = await _context.Students
-                .Include(s => s.Enrollments!)
-                    .ThenInclude(e => e.Course)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ID == id);
+                 .Include(s => s.Enrollments!)
+                     .ThenInclude(e => e.Course)
+                 .AsNoTracking()
+                 .FirstOrDefaultAsync(m => m.ID == id);
+
             if (student == null)
             {
                 return NotFound();
@@ -111,7 +113,6 @@ namespace ContosoUniversity1.Controllers
             }
             catch (DbUpdateException)
             {
-
                 ModelState.AddModelError("", "Unable to save changes. " +
                     "Try again, and if the problem persists " +
                     "see your system administrator.");
@@ -155,8 +156,9 @@ namespace ContosoUniversity1.Controllers
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException /* ex */)
                 {
+                    //Log the error (uncomment ex variable name and write a log.)
                     ModelState.AddModelError("", "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
                         "see your system administrator.");
@@ -190,7 +192,6 @@ namespace ContosoUniversity1.Controllers
 
             return View(student);
         }
-
         // POST: Students/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -208,10 +209,16 @@ namespace ContosoUniversity1.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException /* ex */)
             {
+                //Log the error (uncomment ex variable name and write a log.)
                 return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
             }
+        }
+
+        private bool StudentExists(int id)
+        {
+            return _context.Students.Any(e => e.ID == id);
         }
     }
 }

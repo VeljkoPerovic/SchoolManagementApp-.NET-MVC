@@ -9,7 +9,7 @@ using ContosoUniversity1.Data;
 using ContosoUniversity1.Models;
 using ContosoUniversity1.Models.SchoolViewModels;
 
-namespace ContosoUniversity1.Controllers
+namespace ContosoUniversity.Controllers
 {
     public class InstructorsController : Controller
     {
@@ -105,6 +105,7 @@ namespace ContosoUniversity1.Controllers
             PopulateAssignedCourseData(instructor);
             return View(instructor);
         }
+
         // GET: Instructors/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -185,7 +186,7 @@ namespace ContosoUniversity1.Controllers
             PopulateAssignedCourseData(instructorToUpdate!);
             return View(instructorToUpdate);
         }
-
+        
         private void UpdateInstructorCourses(string[] selectedCourses, Instructor instructorToUpdate)
         {
             if (selectedCourses == null)
@@ -238,23 +239,23 @@ namespace ContosoUniversity1.Controllers
 
         // POST: Instructors/Delete/5
         [HttpPost, ActionName("Delete")]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> DeleteConfirmed(int id)
-{
-    Instructor instructor = await _context.Instructors
-        .Include(i => i.CourseAssignments)
-        .SingleAsync(i => i.ID == id);
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            Instructor instructor = await _context.Instructors
+                .Include(i => i.CourseAssignments)
+                .SingleAsync(i => i.ID == id);
 
-    var departments = await _context.Departments
-        .Where(d => d.InstructorID == id)
-        .ToListAsync();
-    departments.ForEach(d => d.InstructorID = null);
+            var departments = await _context.Departments
+                .Where(d => d.InstructorID == id)
+                .ToListAsync();
+            departments.ForEach(d => d.InstructorID = null);
 
-    _context.Instructors.Remove(instructor);
+            _context.Instructors.Remove(instructor);
 
-    await _context.SaveChangesAsync();
-    return RedirectToAction(nameof(Index));
-}
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
 
         private bool InstructorExists(int id)
         {

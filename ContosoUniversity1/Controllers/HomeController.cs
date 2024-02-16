@@ -1,40 +1,29 @@
-using ContosoUniversity1.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using ContosoUniversity1.Models;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity1.Data;
 using ContosoUniversity1.Models.SchoolViewModels;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Data.Common;
 
 namespace ContosoUniversity1.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly SchoolContext _context;
 
-        public HomeController(ILogger<HomeController> logger, SchoolContext context)
+        public HomeController(SchoolContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public IActionResult Index()
         {
             return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         public async Task<ActionResult> About()
@@ -69,6 +58,17 @@ namespace ContosoUniversity1.Controllers
                 conn.Close();
             }
             return View(groups);
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

@@ -34,10 +34,13 @@ namespace ContosoUniversity1.Controllers
                 return NotFound();
             }
 
+            string query = "SELECT * FROM Department WHERE DepartmentID = {0}";
             var department = await _context.Departments
-                .Include(i => i.Administrator)
+                .FromSqlRaw(query, id)
+                .Include(d => d.Administrator)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.DepartmentID == id);
+                .FirstOrDefaultAsync();
+
             if (department == null)
             {
                 return NotFound();
@@ -49,8 +52,7 @@ namespace ContosoUniversity1.Controllers
         // GET: Departments/Create
         public IActionResult Create()
         {
-            var department = new Department();
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName", department.InstructorID);
+            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
             return View();
         }
 
@@ -81,6 +83,7 @@ namespace ContosoUniversity1.Controllers
                 .Include(i => i.Administrator)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.DepartmentID == id);
+
             if (department == null)
             {
                 return NotFound();
@@ -160,7 +163,7 @@ namespace ContosoUniversity1.Controllers
                                 + "edit operation was canceled and the current values in the database "
                                 + "have been displayed. If you still want to edit this record, click "
                                 + "the Save button again. Otherwise click the Back to List hyperlink.");
-                        departmentToUpdate.RowVersion = (byte[]?)databaseValues.RowVersion;
+                        departmentToUpdate.RowVersion = (byte[])databaseValues.RowVersion!;
                         ModelState.Remove("RowVersion");
                     }
                 }
@@ -202,7 +205,6 @@ namespace ContosoUniversity1.Controllers
 
             return View(department);
         }
-
         // POST: Departments/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]

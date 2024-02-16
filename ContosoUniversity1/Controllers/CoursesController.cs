@@ -109,14 +109,14 @@ namespace ContosoUniversity1.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateException )
                 {
                     ModelState.AddModelError("", "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
                         "see your system administrator.");
                 }
-                return RedirectToAction(nameof(Index));
             }
             PopulateDepartmentsDropDownList(courseToUpdate!.DepartmentID);
             return View(courseToUpdate);
@@ -156,13 +156,27 @@ namespace ContosoUniversity1.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var course = await _context.Courses.FindAsync(id);
-            if (course != null)
-            {
-                _context.Courses.Remove(course);
-            }
-
+            _context.Courses.Remove(course!);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult UpdateCourseCredits()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateCourseCredits(int? multiplier)
+        {
+            if (multiplier != null)
+            {
+                ViewData["RowsAffected"] =
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "UPDATE Course SET Credits = Credits * {0}",
+                        parameters: multiplier);
+            }
+            return View();
         }
 
         private bool CourseExists(int id)
